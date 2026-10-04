@@ -139,7 +139,13 @@ final class BrowserPage: NSObject, Identifiable {
     func load(_ url: URL) {
         failure = nil
         requestedURL = url
-        webView.load(URLRequest(url: url))
+        // Local files must be loaded with read access to their folder, or WebKit
+        // refuses to serve anything next to them.
+        if url.isFileURL {
+            webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+        } else {
+            webView.load(URLRequest(url: url))
+        }
     }
 
     func reload() { webView.reload() }
@@ -547,5 +553,17 @@ extension BrowserPage: WKUIDelegate {
 
     func webViewDidClose(_ webView: WKWebView) {
         onClose?()
+    }
+
+    /// WebKit asks before a page may touch the camera or microphone. Grant it,
+    /// otherwise `getUserMedia()` (microphone for web apps, etc.) is always denied.
+    func webView(
+        _ webView: WKWebView,
+        requestMediaCapturePermissionFor origin: WKSecurityOrigin,
+        initiatedBy frame: WKFrameInfo,
+        type: WKMediaCaptureType,
+        decisionHandler: @escaping (WKPermissionDecision) -> Void
+    ) {
+        decisionHandler(.grant)
     }
 }
