@@ -560,7 +560,7 @@ extension BrowserPage: WKUIDelegate {
     func webView(
         _ webView: WKWebView,
         requestMediaCapturePermissionFor origin: WKSecurityOrigin,
-        initiatedBy frame: WKFrameInfo,
+        initiatedByFrame frame: WKFrameInfo,
         type: WKMediaCaptureType,
         decisionHandler: @escaping (WKPermissionDecision) -> Void
     ) {
